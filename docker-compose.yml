@@ -1,0 +1,33 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-dev
+    ports:
+      - "5672:5672"     # Porta AMQP
+      - "15672:15672"   # Painel de administração (http://localhost:15672)
+    environment:
+      RABBITMQ_DEFAULT_USER: bjnuffmq
+      RABBITMQ_DEFAULT_PASS: gj-YQIiEXyfxQxjsZtiYDKeXIT8ppUq7
+    networks:
+      - rabbit-net
+
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring-app
+    depends_on:
+      - rabbitmq
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: bjnuffmq
+      SPRING_RABBITMQ_PASSWORD: gj-YQIiEXyfxQxjsZtiYDKeXIT8ppUq7
+    ports:
+      - "8080:8080"
+    networks:
+      - rabbit-net
+
+networks:
+  rabbit-net:
+    driver: bridge
