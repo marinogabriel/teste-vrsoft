@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-
     @Bean
     public Jackson2JsonMessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
@@ -51,13 +50,11 @@ public class RabbitConfig {
         return new Queue("pedidos.entrada.gabriel.dlq");
     }
 
-    // Exchange (se necessário)
     @Bean
     public DirectExchange directExchange() {
         return new DirectExchange("pedidos.exchange");
     }
 
-    // Binding (se necessário)
     @Bean
     public Binding bindingEntrada() {
         return BindingBuilder.bind(pedidosEntrada()).to(directExchange()).with("pedidos");

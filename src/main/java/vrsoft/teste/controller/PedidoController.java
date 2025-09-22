@@ -29,7 +29,7 @@ public class PedidoController {
         }
 
         pedidoService.publicarPedido(pedido);
-        statusService.atualizarStatus(pedido.getId(), "Recebido");
+        statusService.atualizarStatus(pedido.getId(), "RECEBIDO");
 
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .body("Pedido recebido. ID: " + pedido.getId());

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import vrsoft.teste.exception.ExcecaoDeProcessamento;
 import vrsoft.teste.model.Pedido;
 import vrsoft.teste.model.StatusPedido;
+import vrsoft.teste.service.StatusService;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -14,11 +15,13 @@ import java.util.Random;
 public class PedidoConsumer {
 
     private final AmqpTemplate amqpTemplate;
+    private final StatusService statusService;
 
     private static final Random random = new Random();
 
-    public PedidoConsumer(AmqpTemplate amqpTemplate) {
+    public PedidoConsumer(AmqpTemplate amqpTemplate, StatusService statusService) {
         this.amqpTemplate = amqpTemplate;
+        this.statusService = statusService;
     }
 
     @RabbitListener(queues = "pedidos.entrada.gabriel")
@@ -43,6 +46,8 @@ public class PedidoConsumer {
 
             // Publicando o status de sucesso
             StatusPedido status = new StatusPedido(pedido.getId(), "SUCESSO", LocalDateTime.now());
+            statusService.atualizarStatus(pedido.getId(), "SUCESSO");
+
             amqpTemplate.convertAndSend("pedidos.status.sucesso.gabriel", status);
 
         } catch (ExcecaoDeProcessamento e) {
@@ -50,6 +55,7 @@ public class PedidoConsumer {
 
             // Enviar para DLQ
             amqpTemplate.convertAndSend("pedidos.status.falha.gabriel", new StatusPedido(pedido.getId(), "FALHA", e.getMessage()));
+            statusService.atualizarStatus(pedido.getId(), "FALHA");
 
             // Rejeitar a mensagem, enviando para a DLQ
             throw e; // Isso vai enviar a mensagem para a DLQ automaticamente
